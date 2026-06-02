@@ -38,6 +38,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        WindowsEffects.init();
         log.info("Application starting");
         if (!AppLock.acquire()) {
             new MessageDialog("Already Running",
@@ -111,7 +112,7 @@ public class MainApp extends Application {
             mainStage.setTitle("Statement Manager");
             mainStage.getIcons().addAll(primaryStage.getIcons());
             mainStage.show();
-            WindowsEffects.apply(mainStage);
+            Platform.runLater(() -> WindowsEffects.apply(mainStage));
 
             mainView.wireKeyNav(mainScene);
             mainView.setEventTracker(new WorkflowEventTracker(mainStage, mainView.getTabPane()));

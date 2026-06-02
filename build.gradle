@@ -104,6 +104,7 @@ run {
         jvmArgs "-Xdock:icon=${projectDir}/packaging/app.icns",
                 '-Xdock:name=Statement Manager'
     }
+    jvmArgs '--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED'
 }
 
 tasks.register('jpackageApp', Exec) {
