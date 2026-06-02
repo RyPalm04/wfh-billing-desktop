@@ -21,6 +21,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +111,7 @@ public class MainApp extends Application {
             mainStage.setTitle("Statement Manager");
             mainStage.getIcons().addAll(primaryStage.getIcons());
             mainStage.show();
+            WindowsEffects.apply(mainStage);
 
             mainView.wireKeyNav(mainScene);
             mainView.setEventTracker(new WorkflowEventTracker(mainStage, mainView.getTabPane()));
