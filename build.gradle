@@ -11,23 +11,55 @@ repositories {
 
 def resolveQualifier = {
     def ref = System.getenv('GITHUB_REF_NAME') ?: ''
-    if (!ref || ref == 'master') return ''
-    if (ref ==~ /v\d+\.\d+\.\d+$/) return ''                  // clean release tag
+    if (!ref) {
+        return 'LOCAL'
+    }
+    if (ref == 'master') {
+        return ''
+    }
+    if (ref ==~ /v\d+\.\d+\.\d+$/) {
+        return ''
+    }
     def tagMatch = (ref =~ /^v\d+\.\d+\.\d+-(.+)$/)
-    if (tagMatch) return tagMatch[0][1]                        // v1.1.0-beta.1 → beta.1
-    if (ref == 'beta') return 'beta'
-    return 'SNAPSHOT'                                          // develop, feature/*, etc.
+    if (tagMatch) {
+        return tagMatch[0][1]
+    }
+    if (ref == 'beta') {
+        return 'beta'
+    }
+    return 'SNAPSHOT'
 }
 
 ext {
     junitVersion = '5.7.1'
     spockVersion = '2.3-groovy-4.0'
-    appVersionBase = '2.0.0'
+    appVersionBase = '1.1.0'
     appVersionQualifier = resolveQualifier()
     appVersion = appVersionQualifier ? "${appVersionBase}-${appVersionQualifier}" : appVersionBase
 }
 
 version = appVersion
+
+def generatedSrcDir = layout.buildDirectory.dir('generated/sources/appInfo/java/main').get().asFile
+
+tasks.register('generateAppInfo') {
+    outputs.dir generatedSrcDir
+    doFirst {
+        def dir = new File(generatedSrcDir, 'com/palmer/billingstatementgenerator')
+        dir.mkdirs()
+        new File(dir, 'AppInfo.java').text = """\
+  package com.palmer.billingstatementgenerator;
+  
+  public final class AppInfo {
+      public static final String VERSION = \"${appVersion}\";
+      private AppInfo() {}
+  }
+  """
+    }
+}
+
+compileJava.dependsOn generateAppInfo
+sourceSets.main.java.srcDirs(tasks.named('generateAppInfo'))
 
 java {
     toolchain {

@@ -503,3 +503,12 @@
 .progress-indicator > .spinner > .segment {
     -fx-progress-color: -sm-gold;
 }
+
+.app-footer {
+    -fx-background-color: -fx-background;
+}
+
+.version-label {
+    -fx-font-size: 9px;
+    -fx-text-fill: -sm-muted
+}

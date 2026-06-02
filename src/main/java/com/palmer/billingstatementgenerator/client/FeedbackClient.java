@@ -2,6 +2,7 @@ package com.palmer.billingstatementgenerator.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.palmer.billingstatementgenerator.AppInfo;
 import javafx.stage.Screen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,8 @@ public class FeedbackClient {
                                         .put("page", currentTab)
                                         .put("userAgent", "Desktop / " + System.getProperty("os.name") + " " + System.getProperty("os.version"))
                                         .put("screenSize", (int) Screen.getPrimary().getBounds().getWidth() + "x" + (int) Screen.getPrimary().getBounds().getHeight())
-                                        .put("referrer", "desktop");
+                                        .put("platform", "desktop")
+                                        .put("appVersion", AppInfo.VERSION);
 
             ObjectNode body = mapper.createObjectNode()
                                     .put("type", type)

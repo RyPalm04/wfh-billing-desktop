@@ -1,5 +1,7 @@
 package com.palmer.billingstatementgenerator.views;
 
+import com.palmer.billingstatementgenerator.AppInfo;
+import com.palmer.billingstatementgenerator.client.VersionClient;
 import com.palmer.billingstatementgenerator.logging.WorkflowEventTracker;
 import com.palmer.billingstatementgenerator.models.statement.Statement;
 import com.palmer.billingstatementgenerator.models.statement.StatementCalculator;
@@ -26,6 +28,7 @@ import com.palmer.billingstatementgenerator.views.dialogs.UnsavedChangesDialog;
 import com.palmer.billingstatementgenerator.views.tabs.GeneratorTabs;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -34,6 +37,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
@@ -71,6 +75,7 @@ public class MainView {
     private static final Logger log = LoggerFactory.getLogger(MainView.class);
     private static final String FXML_BASE = "/views/";
     private final StatementService statementService = StatementService.getInstance();
+    private final Label versionLabel = new Label("API Version: " + AppInfo.VERSION);
     private StackPane rootPane;
     private BorderPane root;
     private TabPane tabPane;
@@ -236,17 +241,40 @@ public class MainView {
         root.setCenter(tabPane);
         root.setBottom(buildButtonBar());
 
+        BorderPane outerPane = generateOuterPane();
+        outerPane.setCenter(root);
+
+        StackPane overlay = generateOverlay();
+        rootPane = new StackPane(outerPane, overlay);
+    }
+
+    private BorderPane generateOuterPane() {
+        versionLabel.getStyleClass().add("version-label");
+
+        HBox footer = new HBox(versionLabel);
+        footer.getStyleClass().add("app-footer");
+        footer.setAlignment(Pos.CENTER_RIGHT);
+        footer.setPadding(new Insets(2, 8, 2, 8));
+
+        BorderPane outerPane = new BorderPane();
+        outerPane.setBottom(footer);
+
+        return outerPane;
+    }
+
+    private StackPane generateOverlay() {
+        StackPane overlay = new StackPane();
         ProgressIndicator spinner = new ProgressIndicator();
         spinner.setMaxSize(100, 100);
         spinner.setStyle("-fx-accent: -sm-navy;");
-        StackPane overlay = new StackPane(spinner);
+        overlay.getChildren().add(spinner);
         overlay.setBackground(new Background(new BackgroundFill(
                 Color.rgb(0, 0, 0, 0.35),
                 CornerRadii.EMPTY,
                 Insets.EMPTY
         )));
         overlay.visibleProperty().bind(statementService.runningProperty().or(PdfService.getInstance().runningProperty()));
-        rootPane = new StackPane(root, overlay);
+        return overlay;
     }
 
     private Button createButton(String name, String btnId, String styleClass) {
@@ -584,5 +612,18 @@ public class MainView {
         for (int i = 2; i < tabPane.getTabs().size(); i++) {
             tabPane.getTabs().get(i).disableProperty().bind(infoIncomplete);
         }
+    }
+
+    public void fetchAndDisplayVersions() {
+        Task<String> task = new Task<>() {
+            @Override
+            protected String call() throws Exception {
+                return new VersionClient().fetchApiVersion();
+            }
+        };
+
+        task.setOnSucceeded(e -> versionLabel.setText("Desktop: v" + AppInfo.VERSION + " | API: v" + task.getValue()));
+
+        new Thread(task).start();
     }
 }

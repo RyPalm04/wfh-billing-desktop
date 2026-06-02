@@ -1,6 +1,7 @@
 package com.palmer.billingstatementgenerator;
 
 import com.palmer.billingstatementgenerator.client.ApiConfig;
+import com.palmer.billingstatementgenerator.client.VersionClient;
 import com.palmer.billingstatementgenerator.logging.WorkflowEventTracker;
 import com.palmer.billingstatementgenerator.models.statement.StatementContext;
 import com.palmer.billingstatementgenerator.util.AppLock;
@@ -114,6 +115,7 @@ public class MainApp extends Application {
             mainView.setEventTracker(new WorkflowEventTracker(mainStage, mainView.getTabPane()));
             mainView.fitWindowToLargestTab();
             mainView.onAppReady();
+            mainView.fetchAndDisplayVersions();
 
             mainStage.setOnCloseRequest(event -> {
                 if (StatementContext.isDirty()) {
