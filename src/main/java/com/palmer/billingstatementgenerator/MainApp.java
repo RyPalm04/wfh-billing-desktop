@@ -1,5 +1,7 @@
 package com.palmer.billingstatementgenerator;
 
+import atlantafx.base.theme.PrimerDark;
+import atlantafx.base.theme.PrimerLight;
 import com.palmer.billingstatementgenerator.client.ApiConfig;
 import com.palmer.billingstatementgenerator.client.VersionClient;
 import com.palmer.billingstatementgenerator.logging.WorkflowEventTracker;
@@ -42,11 +44,14 @@ public class MainApp extends Application {
         log.info("Application starting");
         if (!AppLock.acquire()) {
             new MessageDialog("Already Running",
-                    "Statement Manager is already open.\n" +
+                    "Eternatel is already open.\n" +
                     "Only one instance can run at a time.").open();
             Platform.exit();
             return;
         }
+
+        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+
         loadFonts();
 
         var iconStream = getClass().getResourceAsStream(
@@ -109,7 +114,7 @@ public class MainApp extends Application {
 
             Stage mainStage = new Stage();
             mainStage.setScene(mainScene);
-            mainStage.setTitle("Statement Manager");
+            mainStage.setTitle("Eternatel");
             mainStage.getIcons().addAll(primaryStage.getIcons());
             mainStage.show();
             Platform.runLater(() -> WindowsEffects.apply(mainStage));
