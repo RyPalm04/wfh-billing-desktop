@@ -20,6 +20,7 @@ public class ApiConfig {
     private static String baseUrl;
     private static HttpClient httpClient;
     private static String apiKey = "";
+    private static String tenantId = "";
 
     private ApiConfig() {
     }
@@ -49,6 +50,11 @@ public class ApiConfig {
         String apiKey = config.getProperty("api.key", "").trim();
         if (!apiKey.isEmpty()) {
             ApiConfig.apiKey = apiKey;
+        }
+
+        String tenantId = config.getProperty("api.tenant-id", "").trim();
+        if (!tenantId.isEmpty()) {
+            ApiConfig.tenantId = tenantId;
         }
 
         httpClient = HttpClient.newHttpClient();
@@ -82,8 +88,14 @@ public class ApiConfig {
             return HttpRequest.newBuilder(uri);
         }
 
-        return HttpRequest.newBuilder(uri)
-                .header("X-Api-Key", apiKey);
+        HttpRequest.Builder builder = HttpRequest.newBuilder(uri)
+                                                .header("X-Api-Key", apiKey);
+
+        if (!tenantId.isEmpty()) {
+            builder.header("X-Tenant-Id", tenantId);
+        }
+
+        return builder;
     }
 
     private static Properties loadConfig() {
