@@ -10,6 +10,8 @@ import com.palmer.billingstatementgenerator.util.AppLock;
 import com.palmer.billingstatementgenerator.util.AppPreferences;
 import com.palmer.billingstatementgenerator.views.MainView;
 import com.palmer.billingstatementgenerator.views.SplashView;
+import com.palmer.billingstatementgenerator.views.dialogs.AppDialog;
+import com.palmer.billingstatementgenerator.views.dialogs.LicenseKeyDialog;
 import com.palmer.billingstatementgenerator.views.dialogs.MessageDialog;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -66,6 +68,18 @@ public class MainApp extends Application {
         primaryStage.setScene(splashScene);
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.show();
+
+        String licenseKey = AppPreferences.getLicenseKey();
+        if (licenseKey == null || licenseKey.isBlank()) {
+            AppDialog.configure(primaryStage, null);
+            String entered = new LicenseKeyDialog().open();
+
+            if (entered == null) {
+                Platform.exit();
+                return;
+            }
+            AppPreferences.setLicenseKey(entered);
+        }
 
         Task<Void> initTask = new Task<>() {
             @Override

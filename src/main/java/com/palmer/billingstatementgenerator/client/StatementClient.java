@@ -40,7 +40,13 @@ public class StatementClient {
         try {
             HttpResponse<String> response = getResponse("/next-control-number");
 
-            return Integer.parseInt(response.body().trim());
+            String nextControlNumberString = response.body().trim();
+
+            if (nextControlNumberString.isEmpty()) {
+                return 1001;
+            }
+
+            return Integer.parseInt(nextControlNumberString);
 
         } catch (Exception e) {
             log.error("Failed to get next control number", e);

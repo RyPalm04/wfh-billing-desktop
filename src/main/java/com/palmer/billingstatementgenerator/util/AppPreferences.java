@@ -1,6 +1,10 @@
 package com.palmer.billingstatementgenerator.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 /**
@@ -15,10 +19,12 @@ import java.util.prefs.Preferences;
  * </ul>
  */
 public final class AppPreferences {
+    private static final Logger logger = LoggerFactory.getLogger(AppPreferences.class);
 
     private static final String NODE_PATH = "com/palmer/billingstatementgenerator";
     private static final String KEY_TAX_RATE = "salesTaxRate";
     private static final String KEY_HAS_LAUNCHED = "hasLaunched";
+    private static final String KEY_LICENSE_KEY = "licenseKey";
 
     private AppPreferences() {
     }
@@ -70,5 +76,28 @@ public final class AppPreferences {
      */
     public static void setHasLaunched(boolean value) {
         node().putBoolean(KEY_HAS_LAUNCHED, value);
+    }
+
+    public static String getLicenseKey() {
+        return node().get(KEY_LICENSE_KEY, null);
+    }
+
+    public static void setLicenseKey(String licenseKey) {
+        node().put(KEY_LICENSE_KEY, licenseKey);
+
+        try {
+            node().flush();
+        } catch (BackingStoreException e) {
+            logger.warn("Failed to flush license key to preferences store", e);
+        }
+    }
+
+    public static void removeLicenseKey() {
+        node().remove(KEY_LICENSE_KEY);
+        try {
+            node().flush();
+        } catch (java.util.prefs.BackingStoreException e) {
+            logger.warn("Failed to flush license key removal", e);
+        }
     }
 }
