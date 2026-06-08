@@ -1,5 +1,6 @@
 package com.palmer.billingstatementgenerator.client;
 
+import com.palmer.billingstatementgenerator.util.AppPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,18 +85,22 @@ public class ApiConfig {
     }
 
     public static HttpRequest.Builder authenticatedRequest(URI uri) {
-        if (apiKey.isEmpty()) {
-            return HttpRequest.newBuilder(uri);
+        String licenseKey = AppPreferences.getLicenseKey();
+        HttpRequest.Builder builder = HttpRequest.newBuilder(uri);
+
+        if (licenseKey != null && !licenseKey.isBlank()) {
+            return builder.header("X-License-Key", licenseKey);
         }
 
-        HttpRequest.Builder builder = HttpRequest.newBuilder(uri)
-                                                .header("X-Api-Key", apiKey);
+        if (apiKey.isEmpty()) {
+            return builder;
+        }
 
         if (!tenantId.isEmpty()) {
             builder.header("X-Tenant-Id", tenantId);
         }
 
-        return builder;
+        return builder.header("X-Api-Key", apiKey);
     }
 
     private static Properties loadConfig() {

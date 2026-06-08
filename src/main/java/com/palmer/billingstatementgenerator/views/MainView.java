@@ -9,6 +9,7 @@ import com.palmer.billingstatementgenerator.models.statement.StatementCalculator
 import com.palmer.billingstatementgenerator.models.statement.StatementContext;
 import com.palmer.billingstatementgenerator.services.PdfService;
 import com.palmer.billingstatementgenerator.services.StatementService;
+import com.palmer.billingstatementgenerator.util.AppPreferences;
 import com.palmer.billingstatementgenerator.views.controllers.BaseController;
 import com.palmer.billingstatementgenerator.views.controllers.CashAdvanceController;
 import com.palmer.billingstatementgenerator.views.controllers.InstructionsTabController;
@@ -86,10 +87,16 @@ import java.util.function.Consumer;
 public class MainView {
     private static final Logger log = LoggerFactory.getLogger(MainView.class);
     private static final String FXML_BASE = "/views/";
+    private static final List<KeyCode> RESET_SEQUENCE = List.of(
+            KeyCode.UP, KeyCode.UP, KeyCode.DOWN, KeyCode.DOWN,
+            KeyCode.LEFT, KeyCode.RIGHT, KeyCode.LEFT, KeyCode.RIGHT,
+            KeyCode.E
+    );
     private final StatementService statementService = StatementService.getInstance();
     private final Label versionLabel = new Label("API Version: " + AppInfo.VERSION);
     private final ToggleGroup stepGroup = new ToggleGroup();
     private final List<ToggleButton> stepButtons = new ArrayList<>();
+    private final List<KeyCode> keyBuffer = new ArrayList<>();
     private StackPane rootPane;
     private BorderPane billingPane;
     private TabPane tabPane;
@@ -97,7 +104,6 @@ public class MainView {
     private Button clearButton;
     private Button saveButton;
     private Button resetButton;
-
     /**
      * Controller for the summary tab, held for refresh and reset operations.
      */
@@ -536,6 +542,22 @@ public class MainView {
                     openFeedbackDialogAction();
                     e.consume();
                 }
+            }
+        });
+
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            keyBuffer.add(e.getCode());
+            if (keyBuffer.size() > RESET_SEQUENCE.size()) {
+                keyBuffer.removeFirst();
+            }
+            if (keyBuffer.equals(RESET_SEQUENCE)) {
+                keyBuffer.clear();
+                AppPreferences.removeLicenseKey();
+                new MessageDialog("License Key Cleared",
+                        """
+                                License key has been cleared.
+                                Restart the app to re-activate.
+                                """).open();
             }
         });
     }

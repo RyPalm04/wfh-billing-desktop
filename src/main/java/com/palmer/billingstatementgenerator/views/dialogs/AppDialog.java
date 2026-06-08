@@ -134,4 +134,12 @@ public abstract class AppDialog<R> extends Stage {
         showAndWait();
         return result;
     }
+
+    protected Label buildErrorLabel(String labelText) {
+        Label errorLabel = new Label(labelText);
+        errorLabel.getStyleClass().add("splash-subtitle");
+        errorLabel.setVisible(false);
+
+        return errorLabel;
+    }
 }

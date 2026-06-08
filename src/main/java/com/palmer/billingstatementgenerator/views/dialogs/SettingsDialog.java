@@ -30,24 +30,14 @@ public class SettingsDialog extends AppDialog<Void> {
 
         String displayRate = AppPreferences.getSalesTaxRate()
                 .movePointRight(2).stripTrailingZeros().toPlainString();
-        TextField taxRateField = new TextField(displayRate);
-        taxRateField.setMaxWidth(100);
-        taxRateField.setId("taxRateField");
 
-        Label taxRateError = new Label("Please enter a valid number (e.g. 8.25)");
-        taxRateError.getStyleClass().add("splash-subtitle");
-        taxRateError.setVisible(false);
+        TextField taxRateField = buildTaxRateField(displayRate);
+        Label taxRateError = buildErrorLabel("Please enter a valid number (e.g. 8.25)");
 
         HBox taxRateRow = new HBox(12, taxRateLabel, taxRateField);
         taxRateRow.setAlignment(Pos.CENTER);
 
-        Button resetPromptsButton = new Button("Reset Help Prompts");
-        resetPromptsButton.setId("resetPromptsButton");
-        resetPromptsButton.setOnAction(e -> {
-            AppPreferences.setHasLaunched(false);
-            resetPromptsButton.setText("✓ Takes effect on next launch");
-            resetPromptsButton.setDisable(true);
-        });
+        Button resetPromptsButton = buildResetPromptButton();
 
         Label resetNote = new Label("Shows the instructions tab on next launch");
         resetNote.getStyleClass().add("splash-subtitle");
@@ -55,6 +45,42 @@ public class SettingsDialog extends AppDialog<Void> {
         VBox resetSection = new VBox(6, resetPromptsButton, resetNote);
         resetSection.setAlignment(Pos.CENTER);
 
+        Button saveBtn = buildSaveButton(taxRateField, taxRateError);
+        Button cancelButton = buildCancelButton();
+
+        HBox buttons = new HBox(12, saveBtn, cancelButton);
+        buttons.setAlignment(Pos.CENTER);
+
+        return contentBox("Settings", taxRateRow, taxRateError, resetSection, buttons);
+    }
+
+    private TextField buildTaxRateField(String displayRate) {
+        TextField taxRateField = new TextField(displayRate);
+        taxRateField.setMaxWidth(100);
+        taxRateField.setId("taxRateField");
+        return taxRateField;
+    }
+
+    private Button buildResetPromptButton() {
+        Button resetPromptsButton = new Button("Reset Help Prompts");
+        resetPromptsButton.setId("resetPromptsButton");
+        resetPromptsButton.setOnAction(e -> {
+            AppPreferences.setHasLaunched(false);
+            resetPromptsButton.setText("✓ Takes effect on next launch");
+            resetPromptsButton.setDisable(true);
+        });
+        return resetPromptsButton;
+    }
+
+    private Button buildCancelButton() {
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setId("settingsCancelButton");
+        cancelButton.getStyleClass().add("button-clear");
+        cancelButton.setOnAction(e -> close());
+        return cancelButton;
+    }
+
+    private Button buildSaveButton(TextField taxRateField, Label taxRateError) {
         Button saveBtn = new Button("Save");
         saveBtn.setId("settingsSaveButton");
         saveBtn.setOnAction(e -> {
@@ -68,15 +94,6 @@ public class SettingsDialog extends AppDialog<Void> {
                 taxRateError.setVisible(true);
             }
         });
-
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setId("settingsCancelButton");
-        cancelButton.getStyleClass().add("button-clear");
-        cancelButton.setOnAction(e -> close());
-
-        HBox buttons = new HBox(12, saveBtn, cancelButton);
-        buttons.setAlignment(Pos.CENTER);
-
-        return contentBox("Settings", taxRateRow, taxRateError, resetSection, buttons);
+        return saveBtn;
     }
 }
