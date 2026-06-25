@@ -1,6 +1,7 @@
 package com.palmer.billingstatementgenerator.models.statement;
 
 import com.palmer.billingstatementgenerator.client.CatalogClient;
+import com.palmer.billingstatementgenerator.client.SettingsClient;
 import com.palmer.billingstatementgenerator.client.StatementClient;
 import com.palmer.billingstatementgenerator.models.catalog.ServicePackage;
 import com.palmer.billingstatementgenerator.models.lineitems.CashAdvanceLineItem;
@@ -29,9 +30,10 @@ public final class StatementContext {
 
     private static final Logger log = LoggerFactory.getLogger(StatementContext.class);
     private static final BooleanProperty dirty = new SimpleBooleanProperty(false);
+    private static final CatalogClient catalogClient = new CatalogClient();
+    private static final SettingsClient settingsClient = new SettingsClient();
     private static Statement current;
     private static Integer savedId;
-    private static final CatalogClient catalogClient = new CatalogClient();
 
     private StatementContext() {
     }
@@ -70,9 +72,9 @@ public final class StatementContext {
         int packageId = new StatementClient().load(id, statement);
         if (packageId > 0) {
             ServicePackage pkg = catalogClient.findAllServicePackages().stream()
-                    .filter(p -> p.id() == packageId)
-                    .findFirst()
-                    .orElse(null);
+                                              .filter(p -> p.id() == packageId)
+                                              .findFirst()
+                                              .orElse(null);
             statement.setSelectedPackage(pkg);
         }
         current = statement;
@@ -138,15 +140,15 @@ public final class StatementContext {
 
     private static Statement buildFreshStatement() {
         Statement statement = new Statement();
-        statement.setSalesTaxRate(AppPreferences.getSalesTaxRate());
+        statement.setSalesTaxRate(settingsClient.getSettings().getSalesTaxRate());
         catalogClient.findAllServices()
-                .forEach(s -> statement.getServices().add(new ServiceLineItem(s)));
+                     .forEach(s -> statement.getServices().add(new ServiceLineItem(s)));
         catalogClient.findAllMerchandise()
-                .forEach(m -> statement.getMerchandise().add(new MerchandiseLineItem(m)));
+                     .forEach(m -> statement.getMerchandise().add(new MerchandiseLineItem(m)));
         catalogClient.findAllSpecialCharges()
-                .forEach(sc -> statement.getSpecialCharges().add(new SpecialChargeLineItem(sc)));
+                     .forEach(sc -> statement.getSpecialCharges().add(new SpecialChargeLineItem(sc)));
         catalogClient.findAllCashAdvances()
-                .forEach(ca -> statement.getCashAdvances().add(new CashAdvanceLineItem(ca)));
+                     .forEach(ca -> statement.getCashAdvances().add(new CashAdvanceLineItem(ca)));
         return statement;
     }
 
