@@ -1,5 +1,7 @@
 package com.palmer.billingstatementgenerator.views.dialogs;
 
+import com.palmer.billingstatementgenerator.client.SettingsClient;
+import com.palmer.billingstatementgenerator.models.TenantSettings;
 import com.palmer.billingstatementgenerator.models.statement.StatementContext;
 import com.palmer.billingstatementgenerator.util.AppPreferences;
 import javafx.geometry.Pos;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 public class SettingsDialog extends AppDialog<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(SettingsDialog.class);
+    private static final SettingsClient settingsClient = new SettingsClient();
 
     /**
      * {@inheritDoc}
@@ -28,7 +31,7 @@ public class SettingsDialog extends AppDialog<Void> {
         Label taxRateLabel = new Label("Sales Tax Rate (%)");
         taxRateLabel.getStyleClass().add("splash-subtitle");
 
-        String displayRate = AppPreferences.getSalesTaxRate()
+        String displayRate = settingsClient.getSettings().getSalesTaxRate()
                 .movePointRight(2).stripTrailingZeros().toPlainString();
 
         TextField taxRateField = buildTaxRateField(displayRate);
@@ -86,7 +89,7 @@ public class SettingsDialog extends AppDialog<Void> {
         saveBtn.setOnAction(e -> {
             try {
                 BigDecimal rate = new BigDecimal(taxRateField.getText().trim()).movePointLeft(2);
-                AppPreferences.setSalesTaxRate(rate);
+                settingsClient.updateSettings(new TenantSettings().setSalesTaxRate(rate));
                 StatementContext.current().setSalesTaxRate(rate);
                 log.info("Tax rate updated to {}", rate.toPlainString());
                 close();

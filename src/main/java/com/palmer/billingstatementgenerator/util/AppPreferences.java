@@ -3,7 +3,6 @@ package com.palmer.billingstatementgenerator.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -14,7 +13,6 @@ import java.util.prefs.Preferences;
  *
  * <p>Keys managed here:
  * <ul>
- *   <li>{@code salesTaxRate} — decimal tax rate (e.g. {@code 0.0825} for 8.25%)</li>
  *   <li>{@code hasLaunched} — whether the app has completed at least one launch</li>
  * </ul>
  */
@@ -22,7 +20,6 @@ public final class AppPreferences {
     private static final Logger logger = LoggerFactory.getLogger(AppPreferences.class);
 
     private static final String NODE_PATH = "com/palmer/billingstatementgenerator";
-    private static final String KEY_TAX_RATE = "salesTaxRate";
     private static final String KEY_HAS_LAUNCHED = "hasLaunched";
     private static final String KEY_LICENSE_KEY = "licenseKey";
 
@@ -31,31 +28,6 @@ public final class AppPreferences {
 
     private static Preferences node() {
         return Preferences.userRoot().node(NODE_PATH);
-    }
-
-    /**
-     * Returns the configured sales tax rate.
-     * Defaults to {@code 0.00} if not set or if the stored value cannot be parsed.
-     *
-     * @return the tax rate as a decimal (e.g. {@code 0.0825} for 8.25%)
-     */
-    public static BigDecimal getSalesTaxRate() {
-        String val = node().get(KEY_TAX_RATE, "0.00");
-        try {
-            return new BigDecimal(val);
-        } catch (NumberFormatException e) {
-            return BigDecimal.ZERO;
-        }
-    }
-
-    /**
-     * Persists the sales tax rate.
-     *
-     * @param rate
-     *         the tax rate as a decimal (e.g. {@code 0.0825} for 8.25%)
-     */
-    public static void setSalesTaxRate(BigDecimal rate) {
-        node().put(KEY_TAX_RATE, rate.toPlainString());
     }
 
     /**
